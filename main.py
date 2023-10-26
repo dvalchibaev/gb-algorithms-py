@@ -19,7 +19,7 @@ class Node:
 
 class RedBlackTree:
     def __init__(self):
-        self.NIL_LEAF = Node(0, 1, None)
+        self.NIL_LEAF = Node(None, 1, None)
         self.root = self.NIL_LEAF
 
     def __repr__(self):
@@ -36,12 +36,12 @@ class RedBlackTree:
             current = self.root
             while current != self.NIL_LEAF:
                 new_node.parent = current
-                if new_node.key_value < current.key_value:
+                if new_node.key_value <= current.key_value:
                     current = current.left
                 else:
                     current = current.right
 
-            if new_node.parent.key_value < new_node.key_value:
+            if new_node.parent.key_value <= new_node.key_value:
                 new_node.parent.right = new_node
             else:
                 new_node.parent.left = new_node
@@ -87,53 +87,40 @@ class RedBlackTree:
         node.parent = left_child
 
     def fix_insert(self, node):
-        temp = node
-        while temp:
-            if temp.right == self.NIL_LEAF or temp.left == self.NIL_LEAF:
-                temp = temp.parent
-                continue
-            if temp.right.color == 0 and temp.left.color == 1:
-                self.rotate_right(temp)
-            elif temp.left.color == 0 and temp.left.left.color == 0:
-                self.rotate_left(temp)
-            elif temp.left.color == 0 and temp.right.color == 0:
-                self.swap_color(temp)
+        while node.color == 0 and node.parent.color == 0:
+            if node.parent == node.parent.parent.right:
+                uncle = node.parent.parent.left
+                if uncle.color == 0:
+                    node.parent.color = 1
+                    uncle.color = 1
+                    node.parent.parent.color = 0
+                    node = node.parent.parent
+                else:
+                    if node == node.parent.left:
+                        node = node.parent
+                        self.rotate_right(node)
+
+                    node.parent.color = 1
+                    node.parent.parent.color = 0
+                    self.rotate_left(node.parent.parent)
             else:
-                temp = temp.parent
-        # while node.color == 0 and node.parent.color == 0:
-        #     if node.parent == node.parent.parent.right:
-        #         uncle = node.parent.parent.left
-        #         if uncle.color == 0:
-        #             node.parent.color = 1
-        #             uncle.color = 1
-        #             node.parent.parent.color = 0
-        #             node = node.parent.parent
-        #         else:
-        #             if node == node.parent.left:
-        #                 node = node.parent
-        #                 self.rotate_right(node)
-        #
-        #             node.parent.color = 1
-        #             node.parent.parent.color = 0
-        #             self.rotate_left(node.parent.parent)
-        #     else:
-        #         uncle = node.parent.parent.right
-        #
-        #         if uncle.color == 0:
-        #             node.parent.color = 1
-        #             uncle.color = 1
-        #             node.parent.parent.color = 0
-        #             node = node.parent.parent
-        #         else:
-        #             if node == node.parent.right:
-        #                 node = node.parent
-        #                 self.rotate_left(node)
-        #
-        #             node.parent.color = 1
-        #             node.parent.parent.color = 0
-        #             self.rotate_right(node.parent.parent)
-        #     if node == self.root:
-        #         break
+                uncle = node.parent.parent.right
+
+                if uncle.color == 0:
+                    node.parent.color = 1
+                    uncle.color = 1
+                    node.parent.parent.color = 0
+                    node = node.parent.parent
+                else:
+                    if node == node.parent.right:
+                        node = node.parent
+                        self.rotate_left(node)
+
+                    node.parent.color = 1
+                    node.parent.parent.color = 0
+                    self.rotate_right(node.parent.parent)
+            if node == self.root:
+                break
 
         self.root.color = 1
 
